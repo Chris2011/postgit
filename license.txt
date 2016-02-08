@@ -1,3 +1,5 @@
 This software is free.
 
+Remember to set the module before use. (Tools > options > Miscellaneous > Gitlab)
+
 Informax - daniel.vazquez@informax.es

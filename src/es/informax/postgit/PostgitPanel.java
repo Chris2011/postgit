@@ -6,6 +6,8 @@ import es.informax.postgit.red.Comunicador;
 import es.informax.postgit.red.EventoRed;
 import es.informax.postgit.red.EventoRedListener;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -54,10 +56,25 @@ final class PostgitPanel extends javax.swing.JPanel {
         org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.jLabel4.text")); // NOI18N
 
         textURL.setText(org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.textURL.text")); // NOI18N
+        textURL.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textURLKeyReleased(evt);
+            }
+        });
 
         textUser.setText(org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.textUser.text")); // NOI18N
+        textUser.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textUserKeyReleased(evt);
+            }
+        });
 
         textURLHook.setText(org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.textURLHook.text")); // NOI18N
+        textURLHook.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textURLHookKeyReleased(evt);
+            }
+        });
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(jLabel5, org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.jLabel5.text")); // NOI18N
@@ -66,6 +83,11 @@ final class PostgitPanel extends javax.swing.JPanel {
         jScrollPane1.setViewportView(panelUsuarios);
 
         textPass.setText(org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.textPass.text")); // NOI18N
+        textPass.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textPassKeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -121,6 +143,42 @@ final class PostgitPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void textURLKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textURLKeyReleased
+        if(textURL.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("url", ""))) {
+            this.controller.notChanged();
+        }
+        else {
+            this.controller.changed();
+        }
+    }//GEN-LAST:event_textURLKeyReleased
+
+    private void textUserKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textUserKeyReleased
+        if(textUser.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("user", ""))) {
+            this.controller.notChanged();
+        }
+        else {
+            this.controller.changed();
+        }
+    }//GEN-LAST:event_textUserKeyReleased
+
+    private void textPassKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textPassKeyReleased
+        if(String.valueOf(textPass.getPassword()).equals(NbPreferences.forModule(PostgitPanel.class).get("pass", ""))) {
+            this.controller.notChanged();
+        }
+        else {
+            this.controller.changed();
+        }
+    }//GEN-LAST:event_textPassKeyReleased
+
+    private void textURLHookKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textURLHookKeyReleased
+        if(textURLHook.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("urlHook", ""))) {
+            this.controller.notChanged();
+        }
+        else {
+            this.controller.changed();
+        }
+    }//GEN-LAST:event_textURLHookKeyReleased
+
     void load() {
         textURL.setText(NbPreferences.forModule(PostgitPanel.class).get("url", ""));
         textUser.setText(NbPreferences.forModule(PostgitPanel.class).get("user", ""));
@@ -147,15 +205,51 @@ final class PostgitPanel extends javax.swing.JPanel {
                                 }
                                 catch(ParseException ex) { }
                                 
+                                final JSONObject usuariosMarcadosInner = usuariosMarcados;
+                                
+                                panelUsuarios.removeAll();
+                                ActionListener actionListener = new ActionListener() {
+                                    
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        //Comprobamos si hay cambios en la configuración de la lista de usuarios
+                                        boolean igual = true;
+                                        for(Component panel : panelUsuarios.getComponents()) {
+                                            String id = String.valueOf(((PanelDeveloper)panel).getId());
+                                            boolean marcado = ((PanelDeveloper)panel).isSelected();
+                                            
+                                            if(marcado != Boolean.parseBoolean(String.valueOf(usuariosMarcadosInner.get(id)))) {
+                                                igual = false;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if(igual) {
+                                            PostgitPanel.this.controller.notChanged();
+                                        }
+                                        else {
+                                            PostgitPanel.this.controller.changed();
+                                        }
+                                    }
+                                };
+                                
+                                //Llenamos la tabla de usuarios
                                 JSONArray users = (JSONArray)evt.getResultado();
                                 for(Object user : users) {
                                     JSONObject iter = (JSONObject)user;
 
                                     PanelDeveloper panelDeveloper = new PanelDeveloper(Boolean.parseBoolean(String.valueOf(usuariosMarcados.get(String.valueOf(iter.get("id"))))), String.valueOf(iter.get("avatar_url")), String.valueOf(iter.get("name")), Integer.parseInt(String.valueOf(iter.get("id"))));
+                                    panelDeveloper.setCheckSelectedListener(actionListener);
                                     panelUsuarios.add(panelDeveloper);
                                 }
+                                panelUsuarios.validate();
+                                panelUsuarios.repaint();
                             }
                             else {
+                                panelUsuarios.removeAll();
+                                panelUsuarios.validate();
+                                panelUsuarios.repaint();
+                                
                                 DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error obtaining users."));
                             }
                         }
@@ -164,6 +258,10 @@ final class PostgitPanel extends javax.swing.JPanel {
                     comunicadorUsers.ejecutarAccion();
                 }
                 else {
+                    panelUsuarios.removeAll();
+                    panelUsuarios.validate();
+                    panelUsuarios.repaint();
+                    
                     DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Login error."));
                 }
             }

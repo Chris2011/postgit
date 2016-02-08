@@ -48,7 +48,7 @@ public final class PostgitOptionsPanelController extends OptionsPanelController 
     }
 
     public HelpCtx getHelpCtx() {
-        return null; // new HelpCtx("...ID") if you have a help set
+        return new HelpCtx("es.informax.postgit.about");
     }
 
     public JComponent getComponent(Lookup masterLookup) {
@@ -78,4 +78,7 @@ public final class PostgitOptionsPanelController extends OptionsPanelController 
         pcs.firePropertyChange(OptionsPanelController.PROP_VALID, null, null);
     }
 
+    public void notChanged() {
+        changed = false;
+    }
 }

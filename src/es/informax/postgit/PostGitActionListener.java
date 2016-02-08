@@ -1,14 +1,13 @@
 package es.informax.postgit;
 
+import static es.informax.postgit.PostgitPanel.getServerUrl;
 import es.informax.postgit.red.AccionRedAddProjectMember;
 import es.informax.postgit.red.AccionRedAgregarHook;
 import es.informax.postgit.red.AccionRedCrearProyecto;
-import es.informax.postgit.red.AccionRedListUsers;
 import es.informax.postgit.red.AccionRedLogin;
 import es.informax.postgit.red.Comunicador;
 import es.informax.postgit.red.EventoRed;
 import es.informax.postgit.red.EventoRedListener;
-import static es.informax.postgit.PostgitPanel.getServerUrl;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,8 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -40,7 +37,7 @@ import org.openide.util.NbPreferences;
         displayName = "#CTL_PostGitActionListener"
 )
 @ActionReference(path = "Toolbars/Build", position = 500)
-@Messages("CTL_PostGitActionListener=Post git")
+@Messages("CTL_PostGitActionListener=Create GitLab Project")
 public final class PostGitActionListener implements ActionListener {
 
     @Override
@@ -76,6 +73,7 @@ public final class PostGitActionListener implements ActionListener {
                 @Override
                 public void comunicacionCompletada(EventoRed evt) {
                     if (evt.isCorrecto()) {
+                        //Logged
                         JSONObject session = (JSONObject) evt.getResultado();
                         final String token = String.valueOf(session.get("private_token"));
 
@@ -83,6 +81,7 @@ public final class PostGitActionListener implements ActionListener {
                             @Override
                             public void comunicacionCompletada(EventoRed evt) {
                                 if (evt.isCorrecto()) {
+                                    //Proyecto creado
                                     int idProyecto = Integer.parseInt(String.valueOf(((Map)evt.getResultado()).get("id")));
                                     
                                     try {
@@ -94,6 +93,7 @@ public final class PostGitActionListener implements ActionListener {
 
                                                     @Override
                                                     public void comunicacionCompletada(EventoRed evt) {
+                                                        //Usuarios extra enviados
                                                         if(!evt.isCorrecto()) {
                                                             DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error adding users to project."));
                                                         }
@@ -107,7 +107,8 @@ public final class PostGitActionListener implements ActionListener {
                                     }
                                     
                                     String urlProyecto = NbPreferences.forModule(PostgitPanel.class).get("urlHook", "");
-                                    if(!urlProyecto.isEmpty()) {
+                                    if(!urlProyecto.trim().isEmpty()) {
+                                        //Creando un hook
                                         new Comunicador(getServerUrl() + "projects/" + idProyecto + "/hooks?private_token=" + token, new AccionRedAgregarHook(urlProyecto), new EventoRedListener() {
 
                                             @Override
@@ -120,7 +121,7 @@ public final class PostGitActionListener implements ActionListener {
                                     }
                                 }
                                 else {
-                                    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error - Check if the project already exists and your credentials at Tools > options > Miscellaneous > Git post."));
+                                    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error - Check if the project already exists and your credentials at Tools > options > Miscellaneous > Gitlab."));
                                 }
                             }
                         }).ejecutarAccion();

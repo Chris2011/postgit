@@ -127,6 +127,9 @@
           <ResourceString bundle="es/informax/postgit/Bundle.properties" key="PostgitPanel.textURL.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="textURLKeyReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="textUser">
       <Properties>
@@ -134,6 +137,9 @@
           <ResourceString bundle="es/informax/postgit/Bundle.properties" key="PostgitPanel.textUser.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="textUserKeyReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="textURLHook">
       <Properties>
@@ -141,6 +147,9 @@
           <ResourceString bundle="es/informax/postgit/Bundle.properties" key="PostgitPanel.textURLHook.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="textURLHookKeyReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel5">
       <Properties>
@@ -170,6 +179,9 @@
           <ResourceString bundle="es/informax/postgit/Bundle.properties" key="PostgitPanel.textPass.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="textPassKeyReleased"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

@@ -27,7 +27,7 @@ public class GitWizardPanel1 implements WizardDescriptor.ValidatingPanel<WizardD
     @Override
     public HelpCtx getHelp() {
         // Show no Help button for this panel:
-        return HelpCtx.DEFAULT_HELP;
+        return new HelpCtx("es.informax.postgit.about");
         // If you have context help:
         // return new HelpCtx("help.key.here");
     }
