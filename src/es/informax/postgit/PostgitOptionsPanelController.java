@@ -13,7 +13,7 @@ import org.openide.util.Lookup;
         keywords = "#AdvancedOption_Keywords_Postgit",
         keywordsCategory = "Advanced/Postgit"
 )
-@org.openide.util.NbBundle.Messages({"AdvancedOption_DisplayName_Postgit=Post git", "AdvancedOption_Keywords_Postgit=git"})
+@org.openide.util.NbBundle.Messages({"AdvancedOption_DisplayName_Postgit=Gitlab", "AdvancedOption_Keywords_Postgit=git"})
 public final class PostgitOptionsPanelController extends OptionsPanelController {
 
     private PostgitPanel panel;

@@ -151,7 +151,7 @@ final class PostgitPanel extends javax.swing.JPanel {
                                 for(Object user : users) {
                                     JSONObject iter = (JSONObject)user;
 
-                                    PanelDeveloper panelDeveloper = new PanelDeveloper(Boolean.getBoolean(String.valueOf(usuariosMarcados.get(iter.get("id")))), String.valueOf(iter.get("avatar_url")), String.valueOf(iter.get("name")), Integer.parseInt(String.valueOf(iter.get("id"))));
+                                    PanelDeveloper panelDeveloper = new PanelDeveloper(Boolean.parseBoolean(String.valueOf(usuariosMarcados.get(String.valueOf(iter.get("id"))))), String.valueOf(iter.get("avatar_url")), String.valueOf(iter.get("name")), Integer.parseInt(String.valueOf(iter.get("id"))));
                                     panelUsuarios.add(panelDeveloper);
                                 }
                             }
