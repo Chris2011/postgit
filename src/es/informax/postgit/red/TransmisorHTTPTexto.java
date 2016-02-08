@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  *
  * @author daniel.vazquez
- * @version 1.4
+ * @version 1.5
  */
 public class TransmisorHTTPTexto extends TransmisorHTTP {
 
@@ -44,7 +44,10 @@ public class TransmisorHTTPTexto extends TransmisorHTTP {
             throw e;
         }
         finally {
-            connection.disconnect();
+            try {
+                connection.disconnect();
+            }
+            catch(Exception ex) {}
         }
     }
 }

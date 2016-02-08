@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package es.informax.postgit;
 
 import es.informax.postgit.red.AccionRedListUsers;
@@ -26,50 +21,6 @@ final class PostgitPanel extends javax.swing.JPanel {
     PostgitPanel(PostgitOptionsPanelController controller) {
         this.controller = controller;
         initComponents();
-
-        final Comunicador comunicadorLogin = new Comunicador(getServerUrl() + "session", new AccionRedLogin(getUser(), getPass()), null);
-        EventoRedListener eventoRedListener = new EventoRedListener() {
-            
-            @Override
-            public void comunicacionCompletada(EventoRed evt) {
-                if(evt.isCorrecto()) {
-                    JSONObject session = (JSONObject)evt.getResultado();
-                    String token = String.valueOf(session.get("private_token"));
-                    
-                    Comunicador comunicadorUsers = new Comunicador(getServerUrl() + "users?private_token=" + token, new AccionRedListUsers(token), new EventoRedListener() {
-                        @Override
-                        public void comunicacionCompletada(EventoRed evt) {
-                            if(evt.isCorrecto()) {
-                                JSONObject usuariosMarcados = new JSONObject();
-                                try {
-                                    JSONParser parser = new JSONParser();
-                                    usuariosMarcados = (JSONObject)parser.parse(NbPreferences.forModule(PostgitPanel.class).get("usuariosMarcados", "{}"));
-                                }
-                                catch(ParseException ex) { }
-                                
-                                JSONArray users = (JSONArray)evt.getResultado();
-                                for(Object user : users) {
-                                    JSONObject iter = (JSONObject)user;
-
-                                    PanelDeveloper panelDeveloper = new PanelDeveloper(Boolean.getBoolean(String.valueOf(usuariosMarcados.get(iter.get("id")))), String.valueOf(iter.get("avatar_url")), String.valueOf(iter.get("name")), Integer.parseInt(String.valueOf(iter.get("id"))));
-                                    panelUsuarios.add(panelDeveloper);
-                                }
-                            }
-                            else {
-                                DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error obtaining users."));
-                            }
-                        }
-                    });
-                    comunicadorUsers.setRequestMethod("GET");
-                    comunicadorUsers.ejecutarAccion();
-                }
-                else {
-                    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Login error."));
-                }
-            }
-        };
-        comunicadorLogin.setListener(eventoRedListener);
-        comunicadorLogin.ejecutarAccion();
     }
 
     /**
@@ -175,6 +126,50 @@ final class PostgitPanel extends javax.swing.JPanel {
         textUser.setText(NbPreferences.forModule(PostgitPanel.class).get("user", ""));
         textPass.setText(NbPreferences.forModule(PostgitPanel.class).get("pass", ""));
         textURLHook.setText(NbPreferences.forModule(PostgitPanel.class).get("urlHook", ""));
+        
+        final Comunicador comunicadorLogin = new Comunicador(getServerUrl() + "session", new AccionRedLogin(getUser(), getPass()), null);
+        EventoRedListener eventoRedListener = new EventoRedListener() {
+            
+            @Override
+            public void comunicacionCompletada(EventoRed evt) {
+                if(evt.isCorrecto()) {
+                    JSONObject session = (JSONObject)evt.getResultado();
+                    String token = String.valueOf(session.get("private_token"));
+                    
+                    Comunicador comunicadorUsers = new Comunicador(getServerUrl() + "users?private_token=" + token, new AccionRedListUsers(token), new EventoRedListener() {
+                        @Override
+                        public void comunicacionCompletada(EventoRed evt) {
+                            if(evt.isCorrecto()) {
+                                JSONObject usuariosMarcados = new JSONObject();
+                                try {
+                                    JSONParser parser = new JSONParser();
+                                    usuariosMarcados = (JSONObject)parser.parse(NbPreferences.forModule(PostgitPanel.class).get("usuariosMarcados", "{}"));
+                                }
+                                catch(ParseException ex) { }
+                                
+                                JSONArray users = (JSONArray)evt.getResultado();
+                                for(Object user : users) {
+                                    JSONObject iter = (JSONObject)user;
+
+                                    PanelDeveloper panelDeveloper = new PanelDeveloper(Boolean.getBoolean(String.valueOf(usuariosMarcados.get(iter.get("id")))), String.valueOf(iter.get("avatar_url")), String.valueOf(iter.get("name")), Integer.parseInt(String.valueOf(iter.get("id"))));
+                                    panelUsuarios.add(panelDeveloper);
+                                }
+                            }
+                            else {
+                                DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error obtaining users."));
+                            }
+                        }
+                    });
+                    comunicadorUsers.setRequestMethod("GET");
+                    comunicadorUsers.ejecutarAccion();
+                }
+                else {
+                    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Login error."));
+                }
+            }
+        };
+        comunicadorLogin.setListener(eventoRedListener);
+        comunicadorLogin.ejecutarAccion();
     }
 
     void store() {
