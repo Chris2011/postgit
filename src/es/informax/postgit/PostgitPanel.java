@@ -214,23 +214,32 @@ final class PostgitPanel extends javax.swing.JPanel {
                         JSONObject session = (JSONObject) evt.getResultado();
                         final String token = String.valueOf(session.get("private_token"));
 
-                        Comunicador comunicadorProjects = new Comunicador(getServerUrl() + "projects?private_token=" + token, new AccionRedListProjects(), new EventoRedListener() {
+                        Comunicador comunicadorProjects = new Comunicador(getServerUrl() + "projects/all?private_token=" + token, new AccionRedListProjects(), new EventoRedListener() {
                             @Override
                             public void comunicacionCompletada(EventoRed evt) {
                                 if (evt.isCorrecto()) {
                                     for(Map project : (Iterable<Map>)evt.getResultado()) {
+                                        String idProyecto = String.valueOf(project.get("id"));
+                                        
                                         try {
                                             //Usuarios
                                             JSONParser parser = new JSONParser();
                                             JSONObject usuarios = (JSONObject)parser.parse(NbPreferences.forModule(PostgitPanel.class).get("usuariosMarcados", "{}"));
                                             for(Object usuario : usuarios.keySet()) {
                                                 if((boolean)usuarios.get(usuario)) {
-                                                    new Comunicador(getServerUrl() + "projects/" + "133" + "/members?private_token=" + token, new AccionRedAddProjectMember(Integer.parseInt(String.valueOf(usuario)), 40), new EventoRedListener() {
+                                                    new Comunicador(getServerUrl() + "projects/" + idProyecto + "/members?private_token=" + token, new AccionRedAddProjectMember(Integer.parseInt(String.valueOf(usuario)), 40), new EventoRedListener() {
+                                                        private String idProyecto;
+
+                                                        public EventoRedListener setIdProyecto(String idProyecto) {
+                                                            this.idProyecto = idProyecto;
+                                                            
+                                                            return this;
+                                                        }
 
                                                         @Override
                                                         public void comunicacionCompletada(EventoRed evt) {
                                                             if(evt.isCorrecto()) {
-                                                                Comunicador comunicador = new Comunicador(getServerUrl() + "projects/" + "133" + "/members/" + String.valueOf(((Map)evt.getResultado()).get("id")) + "?private_token=" + token, new AccionRedModifyProjectMember(40), new EventoRedListener() {
+                                                                Comunicador comunicador = new Comunicador(getServerUrl() + "projects/" + idProyecto + "/members/" + String.valueOf(((Map)evt.getResultado()).get("id")) + "?private_token=" + token, new AccionRedModifyProjectMember(40), new EventoRedListener() {
                                                                     @Override
                                                                     public void comunicacionCompletada(EventoRed evt) {
                                                                         if (!evt.isCorrecto()) {
@@ -245,7 +254,7 @@ final class PostgitPanel extends javax.swing.JPanel {
                                                                 DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error adding users to project."));
                                                             }
                                                         }
-                                                    }).ejecutarAccion();
+                                                    }.setIdProyecto(idProyecto)).ejecutarAccion();
                                                 }
                                             }
                                         }
@@ -255,8 +264,15 @@ final class PostgitPanel extends javax.swing.JPanel {
 
                                         try {
                                             //hooks
-                                            Comunicador comunicadorHooks = new Comunicador(getServerUrl() + "projects/" + "133" + "/hooks?private_token=" + token, new AccionRedListHooks(), new EventoRedListener() {
+                                            Comunicador comunicadorHooks = new Comunicador(getServerUrl() + "projects/" + idProyecto + "/hooks?private_token=" + token, new AccionRedListHooks(), new EventoRedListener() {
                                                 private volatile int hooksProcesados = 0;
+                                                private String idProyecto;
+
+                                                public EventoRedListener setIdProyecto(String idProyecto) {
+                                                    this.idProyecto = idProyecto;
+
+                                                    return this;
+                                                }
 
                                                 @Override
                                                 public void comunicacionCompletada(EventoRed evt) {
@@ -264,7 +280,14 @@ final class PostgitPanel extends javax.swing.JPanel {
                                                         final int cantidadHooks = ((Collection<Map>)evt.getResultado()).size();
                                                         //Borrar hooks
                                                         for(Map hook : (Iterable<Map>)evt.getResultado()) {
-                                                            Comunicador comunicadorBorrarHooks = new Comunicador(getServerUrl() + "projects/" + "133" + "/hooks/" + String.valueOf(hook.get("id")) + "?private_token=" + token, new AccionRedDeleteHook(), new EventoRedListener() {
+                                                            Comunicador comunicadorBorrarHooks = new Comunicador(getServerUrl() + "projects/" + idProyecto + "/hooks/" + String.valueOf(hook.get("id")) + "?private_token=" + token, new AccionRedDeleteHook(), new EventoRedListener() {
+                                                                private String idProyecto;
+
+                                                                public EventoRedListener setIdProyecto(String idProyecto) {
+                                                                    this.idProyecto = idProyecto;
+
+                                                                    return this;
+                                                                }
 
                                                                 @Override
                                                                 public void comunicacionCompletada(EventoRed evt) {
@@ -275,29 +298,34 @@ final class PostgitPanel extends javax.swing.JPanel {
                                                                     hooksProcesados++;
 
                                                                     if(hooksProcesados >= cantidadHooks) {
-                                                                        crearHook(token);
+                                                                        crearHook(token, idProyecto);
                                                                     }
                                                                 }
-                                                            });
+                                                            }.setIdProyecto(idProyecto));
                                                             comunicadorBorrarHooks.setRequestMethod("DELETE");
                                                             comunicadorBorrarHooks.ejecutarAccion();
                                                         }
 
                                                         if(((Collection<Map>)evt.getResultado()).isEmpty()) {
-                                                            crearHook(token);
+                                                            crearHook(token, idProyecto);
                                                         }
                                                     }
                                                     else {
                                                         DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error obtaining project hooks."));
                                                     }
                                                 }
-                                            });
+                                            }.setIdProyecto(idProyecto));
                                             comunicadorHooks.setRequestMethod("GET");
                                             comunicadorHooks.ejecutarAccion();
                                         }
                                         catch(Exception ex) { 
                                             DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error adding users to project."));
                                         }
+                                        
+                                        try {
+                                            Thread.sleep(1000);
+                                        }
+                                        catch(InterruptedException ex) { }
                                     }
                                     
                                     DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("All data has been sent."));    
@@ -320,11 +348,11 @@ final class PostgitPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnForzarActionPerformed
 
-    private void crearHook(String token) {
+    private void crearHook(String token, String idProyecto) {
         //Crear hook
         String urlProyecto = NbPreferences.forModule(PostgitPanel.class).get("urlHook", "");
         if(!urlProyecto.trim().isEmpty()) {
-            new Comunicador(getServerUrl() + "projects/" + "133" + "/hooks?private_token=" + token, new AccionRedAgregarHook(urlProyecto), new EventoRedListener() {
+            new Comunicador(getServerUrl() + "projects/" + idProyecto + "/hooks?private_token=" + token, new AccionRedAgregarHook(urlProyecto), new EventoRedListener() {
 
                 @Override
                 public void comunicacionCompletada(EventoRed evt) {
