@@ -11,18 +11,11 @@ import org.json.simple.parser.ParseException;
  *
  * @author daniel.vazquez
  */
-public class AccionRedListUsers implements AccionRed {
-    
-    private final String token;
-
-    public AccionRedListUsers(String token) {
-        this.token = token;
-    }
+public class AccionRedListHooks implements AccionRed {
 
     @Override
     public Map<String, String> getParametros() {
         HashMap<String, String> params = new HashMap<>();
-        //params.put("private_token", token);
         
         return params;
     }

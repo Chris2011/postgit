@@ -89,7 +89,7 @@ public final class PostGitActionListener implements ActionListener {
                                         JSONObject usuarios = (JSONObject)parser.parse(NbPreferences.forModule(PostgitPanel.class).get("usuariosMarcados", "{}"));
                                         for(Object usuario : usuarios.keySet()) {
                                             if((boolean)usuarios.get(usuario)) {
-                                                new Comunicador(getServerUrl() + "projects/" + idProyecto + "/members?private_token=" + token, new AccionRedAddProjectMember(Integer.parseInt(String.valueOf(usuario)), 30), new EventoRedListener() {
+                                                new Comunicador(getServerUrl() + "projects/" + idProyecto + "/members?private_token=" + token, new AccionRedAddProjectMember(Integer.parseInt(String.valueOf(usuario)), 40), new EventoRedListener() {
 
                                                     @Override
                                                     public void comunicacionCompletada(EventoRed evt) {

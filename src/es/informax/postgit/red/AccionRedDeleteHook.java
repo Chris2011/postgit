@@ -1,9 +1,7 @@
 package es.informax.postgit.red;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -11,19 +9,13 @@ import org.json.simple.parser.ParseException;
  *
  * @author daniel.vazquez
  */
-public class AccionRedListUsers implements AccionRed {
+public class AccionRedDeleteHook implements AccionRed {
     
-    private final String token;
-
-    public AccionRedListUsers(String token) {
-        this.token = token;
-    }
 
     @Override
     public Map<String, String> getParametros() {
         HashMap<String, String> params = new HashMap<>();
-        //params.put("private_token", token);
-        
+
         return params;
     }
 
@@ -34,14 +26,6 @@ public class AccionRedListUsers implements AccionRed {
         try {
             JSONParser parser = new JSONParser();
             resultado = parser.parse(respuesta);
-            if(!(resultado instanceof Collection)) {
-                Object resultadoTemp = resultado;
-                
-                resultado = new JSONArray();
-                if(resultadoTemp instanceof Map) {
-                    ((Collection)resultado).add(resultadoTemp);
-                }
-            }
         }
         catch(ParseException ex) { }
         

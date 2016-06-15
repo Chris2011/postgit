@@ -1,13 +1,22 @@
 package es.informax.postgit;
 
+import es.informax.postgit.red.AccionRedAddProjectMember;
+import es.informax.postgit.red.AccionRedAgregarHook;
+import es.informax.postgit.red.AccionRedDeleteHook;
+import es.informax.postgit.red.AccionRedListHooks;
+import es.informax.postgit.red.AccionRedListProjects;
 import es.informax.postgit.red.AccionRedListUsers;
 import es.informax.postgit.red.AccionRedLogin;
+import es.informax.postgit.red.AccionRedModifyProjectMember;
 import es.informax.postgit.red.Comunicador;
 import es.informax.postgit.red.EventoRed;
 import es.informax.postgit.red.EventoRedListener;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.Map;
+import javax.swing.JOptionPane;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -16,6 +25,11 @@ import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.NbPreferences;
 
+/**
+ * 
+ * @author daniel.vazquez
+ * @version 1.3
+ */
 final class PostgitPanel extends javax.swing.JPanel {
 
     private final PostgitOptionsPanelController controller;
@@ -42,6 +56,7 @@ final class PostgitPanel extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         panelUsuarios = new javax.swing.JPanel();
         textPass = new javax.swing.JPasswordField();
+        btnForzar = new javax.swing.JButton();
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.jLabel1.text")); // NOI18N
@@ -89,12 +104,19 @@ final class PostgitPanel extends javax.swing.JPanel {
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(btnForzar, org.openide.util.NbBundle.getMessage(PostgitPanel.class, "PostgitPanel.btnForzar.text")); // NOI18N
+        btnForzar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnForzarActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(17, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -102,17 +124,17 @@ final class PostgitPanel extends javax.swing.JPanel {
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(textURL, javax.swing.GroupLayout.DEFAULT_SIZE, 536, Short.MAX_VALUE)
-                                .addComponent(textUser, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(textURLHook))
-                            .addComponent(textPass, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(textURL, javax.swing.GroupLayout.DEFAULT_SIZE, 536, Short.MAX_VALUE)
+                    .addComponent(textUser, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(textURLHook)
+                    .addComponent(textPass, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1))
+                .addContainerGap(17, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnForzar)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -137,14 +159,16 @@ final class PostgitPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel5)
-                        .addGap(0, 132, Short.MAX_VALUE))
+                        .addGap(0, 231, Short.MAX_VALUE))
                     .addComponent(jScrollPane1))
+                .addGap(18, 18, 18)
+                .addComponent(btnForzar, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void textURLKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textURLKeyReleased
-        if(textURL.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("url", ""))) {
+        if (textURL.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("url", ""))) {
             this.controller.notChanged();
         }
         else {
@@ -153,7 +177,7 @@ final class PostgitPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_textURLKeyReleased
 
     private void textUserKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textUserKeyReleased
-        if(textUser.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("user", ""))) {
+        if (textUser.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("user", ""))) {
             this.controller.notChanged();
         }
         else {
@@ -162,7 +186,7 @@ final class PostgitPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_textUserKeyReleased
 
     private void textPassKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textPassKeyReleased
-        if(String.valueOf(textPass.getPassword()).equals(NbPreferences.forModule(PostgitPanel.class).get("pass", ""))) {
+        if (String.valueOf(textPass.getPassword()).equals(NbPreferences.forModule(PostgitPanel.class).get("pass", ""))) {
             this.controller.notChanged();
         }
         else {
@@ -171,7 +195,7 @@ final class PostgitPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_textPassKeyReleased
 
     private void textURLHookKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textURLHookKeyReleased
-        if(textURLHook.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("urlHook", ""))) {
+        if (textURLHook.getText().equals(NbPreferences.forModule(PostgitPanel.class).get("urlHook", ""))) {
             this.controller.notChanged();
         }
         else {
@@ -179,52 +203,186 @@ final class PostgitPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_textURLHookKeyReleased
 
+    private void btnForzarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForzarActionPerformed
+        if (JOptionPane.showConfirmDialog(this, "Current project config will be overriden. Are you sure?", "Warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+            Comunicador comunicadorLogin = new Comunicador(getServerUrl() + "session", new AccionRedLogin(getUser(), getPass()), null);
+            EventoRedListener eventoRedListener = new EventoRedListener() {
+
+                @Override
+                public void comunicacionCompletada(EventoRed evt) {
+                    if (evt.isCorrecto()) {
+                        JSONObject session = (JSONObject) evt.getResultado();
+                        final String token = String.valueOf(session.get("private_token"));
+
+                        Comunicador comunicadorProjects = new Comunicador(getServerUrl() + "projects?private_token=" + token, new AccionRedListProjects(), new EventoRedListener() {
+                            @Override
+                            public void comunicacionCompletada(EventoRed evt) {
+                                if (evt.isCorrecto()) {
+                                    for(Map project : (Iterable<Map>)evt.getResultado()) {
+                                        try {
+                                            //Usuarios
+                                            JSONParser parser = new JSONParser();
+                                            JSONObject usuarios = (JSONObject)parser.parse(NbPreferences.forModule(PostgitPanel.class).get("usuariosMarcados", "{}"));
+                                            for(Object usuario : usuarios.keySet()) {
+                                                if((boolean)usuarios.get(usuario)) {
+                                                    new Comunicador(getServerUrl() + "projects/" + "133" + "/members?private_token=" + token, new AccionRedAddProjectMember(Integer.parseInt(String.valueOf(usuario)), 40), new EventoRedListener() {
+
+                                                        @Override
+                                                        public void comunicacionCompletada(EventoRed evt) {
+                                                            if(evt.isCorrecto()) {
+                                                                Comunicador comunicador = new Comunicador(getServerUrl() + "projects/" + "133" + "/members/" + String.valueOf(((Map)evt.getResultado()).get("id")) + "?private_token=" + token, new AccionRedModifyProjectMember(40), new EventoRedListener() {
+                                                                    @Override
+                                                                    public void comunicacionCompletada(EventoRed evt) {
+                                                                        if (!evt.isCorrecto()) {
+                                                                            DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error editing users in project."));
+                                                                        }
+                                                                    }
+                                                                });
+                                                                comunicador.setRequestMethod("PUT");
+                                                                comunicador.ejecutarAccion();
+                                                            }
+                                                            else {
+                                                                DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error adding users to project."));
+                                                            }
+                                                        }
+                                                    }).ejecutarAccion();
+                                                }
+                                            }
+                                        }
+                                        catch(NumberFormatException | ParseException ex) { 
+                                            DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error adding users to project."));
+                                        }
+
+                                        try {
+                                            //hooks
+                                            Comunicador comunicadorHooks = new Comunicador(getServerUrl() + "projects/" + "133" + "/hooks?private_token=" + token, new AccionRedListHooks(), new EventoRedListener() {
+                                                private volatile int hooksProcesados = 0;
+
+                                                @Override
+                                                public void comunicacionCompletada(EventoRed evt) {
+                                                    if(evt.isCorrecto()) {
+                                                        final int cantidadHooks = ((Collection<Map>)evt.getResultado()).size();
+                                                        //Borrar hooks
+                                                        for(Map hook : (Iterable<Map>)evt.getResultado()) {
+                                                            Comunicador comunicadorBorrarHooks = new Comunicador(getServerUrl() + "projects/" + "133" + "/hooks/" + String.valueOf(hook.get("id")) + "?private_token=" + token, new AccionRedDeleteHook(), new EventoRedListener() {
+
+                                                                @Override
+                                                                public void comunicacionCompletada(EventoRed evt) {
+                                                                    if(!evt.isCorrecto()) {
+                                                                        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error deleting hooks."));
+                                                                    }
+
+                                                                    hooksProcesados++;
+
+                                                                    if(hooksProcesados >= cantidadHooks) {
+                                                                        crearHook(token);
+                                                                    }
+                                                                }
+                                                            });
+                                                            comunicadorBorrarHooks.setRequestMethod("DELETE");
+                                                            comunicadorBorrarHooks.ejecutarAccion();
+                                                        }
+
+                                                        if(((Collection<Map>)evt.getResultado()).isEmpty()) {
+                                                            crearHook(token);
+                                                        }
+                                                    }
+                                                    else {
+                                                        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error obtaining project hooks."));
+                                                    }
+                                                }
+                                            });
+                                            comunicadorHooks.setRequestMethod("GET");
+                                            comunicadorHooks.ejecutarAccion();
+                                        }
+                                        catch(Exception ex) { 
+                                            DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error adding users to project."));
+                                        }
+                                    }
+                                    
+                                    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("All data has been sent."));    
+                                }
+                                else {
+                                    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error obtaining projects."));
+                                }
+                            }
+                        });
+                        comunicadorProjects.setRequestMethod("GET");
+                        comunicadorProjects.ejecutarAccion();
+                    }
+                    else {
+                        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Login error."));
+                    }
+                }
+            };
+            comunicadorLogin.setListener(eventoRedListener);
+            comunicadorLogin.ejecutarAccion();
+        }
+    }//GEN-LAST:event_btnForzarActionPerformed
+
+    private void crearHook(String token) {
+        //Crear hook
+        String urlProyecto = NbPreferences.forModule(PostgitPanel.class).get("urlHook", "");
+        if(!urlProyecto.trim().isEmpty()) {
+            new Comunicador(getServerUrl() + "projects/" + "133" + "/hooks?private_token=" + token, new AccionRedAgregarHook(urlProyecto), new EventoRedListener() {
+
+                @Override
+                public void comunicacionCompletada(EventoRed evt) {
+                    if(!evt.isCorrecto()) {
+                        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error adding web hook to project."));
+                    }
+                }
+            }).ejecutarAccion();
+        }
+    }
+    
     void load() {
         textURL.setText(NbPreferences.forModule(PostgitPanel.class).get("url", ""));
         textUser.setText(NbPreferences.forModule(PostgitPanel.class).get("user", ""));
         textPass.setText(NbPreferences.forModule(PostgitPanel.class).get("pass", ""));
         textURLHook.setText(NbPreferences.forModule(PostgitPanel.class).get("urlHook", ""));
-        
+
         final Comunicador comunicadorLogin = new Comunicador(getServerUrl() + "session", new AccionRedLogin(getUser(), getPass()), null);
         EventoRedListener eventoRedListener = new EventoRedListener() {
-            
+
             @Override
             public void comunicacionCompletada(EventoRed evt) {
-                if(evt.isCorrecto()) {
-                    JSONObject session = (JSONObject)evt.getResultado();
+                if (evt.isCorrecto()) {
+                    JSONObject session = (JSONObject) evt.getResultado();
                     String token = String.valueOf(session.get("private_token"));
-                    
+
                     Comunicador comunicadorUsers = new Comunicador(getServerUrl() + "users?private_token=" + token, new AccionRedListUsers(token), new EventoRedListener() {
                         @Override
                         public void comunicacionCompletada(EventoRed evt) {
-                            if(evt.isCorrecto()) {
+                            if (evt.isCorrecto()) {
                                 JSONObject usuariosMarcados = new JSONObject();
                                 try {
                                     JSONParser parser = new JSONParser();
-                                    usuariosMarcados = (JSONObject)parser.parse(NbPreferences.forModule(PostgitPanel.class).get("usuariosMarcados", "{}"));
+                                    usuariosMarcados = (JSONObject) parser.parse(NbPreferences.forModule(PostgitPanel.class).get("usuariosMarcados", "{}"));
                                 }
-                                catch(ParseException ex) { }
-                                
+                                catch (ParseException ex) {
+                                }
+
                                 final JSONObject usuariosMarcadosInner = usuariosMarcados;
-                                
+
                                 panelUsuarios.removeAll();
                                 ActionListener actionListener = new ActionListener() {
-                                    
+
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
                                         //Comprobamos si hay cambios en la configuración de la lista de usuarios
                                         boolean igual = true;
-                                        for(Component panel : panelUsuarios.getComponents()) {
-                                            String id = String.valueOf(((PanelDeveloper)panel).getId());
-                                            boolean marcado = ((PanelDeveloper)panel).isSelected();
-                                            
-                                            if(marcado != Boolean.parseBoolean(String.valueOf(usuariosMarcadosInner.get(id)))) {
+                                        for (Component panel : panelUsuarios.getComponents()) {
+                                            String id = String.valueOf(((PanelDeveloper) panel).getId());
+                                            boolean marcado = ((PanelDeveloper) panel).isSelected();
+
+                                            if (marcado != Boolean.parseBoolean(String.valueOf(usuariosMarcadosInner.get(id)))) {
                                                 igual = false;
                                                 break;
                                             }
                                         }
-                                        
-                                        if(igual) {
+
+                                        if (igual) {
                                             PostgitPanel.this.controller.notChanged();
                                         }
                                         else {
@@ -232,11 +390,11 @@ final class PostgitPanel extends javax.swing.JPanel {
                                         }
                                     }
                                 };
-                                
+
                                 //Llenamos la tabla de usuarios
-                                JSONArray users = (JSONArray)evt.getResultado();
-                                for(Object user : users) {
-                                    JSONObject iter = (JSONObject)user;
+                                JSONArray users = (JSONArray) evt.getResultado();
+                                for (Object user : users) {
+                                    JSONObject iter = (JSONObject) user;
 
                                     PanelDeveloper panelDeveloper = new PanelDeveloper(Boolean.parseBoolean(String.valueOf(usuariosMarcados.get(String.valueOf(iter.get("id"))))), String.valueOf(iter.get("avatar_url")), String.valueOf(iter.get("name")), Integer.parseInt(String.valueOf(iter.get("id"))));
                                     panelDeveloper.setCheckSelectedListener(actionListener);
@@ -249,7 +407,7 @@ final class PostgitPanel extends javax.swing.JPanel {
                                 panelUsuarios.removeAll();
                                 panelUsuarios.validate();
                                 panelUsuarios.repaint();
-                                
+
                                 DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Error obtaining users."));
                             }
                         }
@@ -261,7 +419,7 @@ final class PostgitPanel extends javax.swing.JPanel {
                     panelUsuarios.removeAll();
                     panelUsuarios.validate();
                     panelUsuarios.repaint();
-                    
+
                     DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message("Login error."));
                 }
             }
@@ -271,15 +429,15 @@ final class PostgitPanel extends javax.swing.JPanel {
     }
 
     void store() {
-        NbPreferences.forModule(PostgitPanel.class).put("url", textURL.getText());
-        NbPreferences.forModule(PostgitPanel.class).put("user", textUser.getText());
+        NbPreferences.forModule(PostgitPanel.class).put("url", textURL.getText().trim());
+        NbPreferences.forModule(PostgitPanel.class).put("user", textUser.getText().trim());
         NbPreferences.forModule(PostgitPanel.class).put("pass", String.valueOf(textPass.getPassword()));
-        NbPreferences.forModule(PostgitPanel.class).put("urlHook", textURLHook.getText());
-        
+        NbPreferences.forModule(PostgitPanel.class).put("urlHook", textURLHook.getText().trim());
+
         JSONObject usuarios = new JSONObject();
-        for(Component componente : panelUsuarios.getComponents()) {
-            PanelDeveloper panel = (PanelDeveloper)componente;
-            
+        for (Component componente : panelUsuarios.getComponents()) {
+            PanelDeveloper panel = (PanelDeveloper) componente;
+
             usuarios.put(panel.getId(), panel.isSelected());
         }
         NbPreferences.forModule(PostgitPanel.class).put("usuariosMarcados", usuarios.toJSONString());
@@ -289,20 +447,21 @@ final class PostgitPanel extends javax.swing.JPanel {
         // TODO check whether form is consistent and complete
         return true;
     }
-    
+
     public static String getServerUrl() {
         return NbPreferences.forModule(PostgitPanel.class).get("url", "") + "/api/v3/";
     }
-    
+
     public static String getUser() {
         return NbPreferences.forModule(PostgitPanel.class).get("user", "");
     }
-    
+
     public static String getPass() {
         return NbPreferences.forModule(PostgitPanel.class).get("pass", "");
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnForzar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

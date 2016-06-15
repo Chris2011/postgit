@@ -57,8 +57,8 @@ public class GitWizardPanel1 implements WizardDescriptor.ValidatingPanel<WizardD
 
     @Override
     public void storeSettings(WizardDescriptor wiz) {
-        wiz.putProperty("nombre", getComponent().getTextNombre().getText()); 
-        wiz.putProperty("descripcion", getComponent().getTextDescripcion().getText());
+        wiz.putProperty("nombre", getComponent().getTextNombre().getText().trim()); 
+        wiz.putProperty("descripcion", getComponent().getTextDescripcion().getText().trim());
     }
 
     @Override
